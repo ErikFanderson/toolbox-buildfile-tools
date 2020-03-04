@@ -1,0 +1,25 @@
+# Name must match the class name in __init__.py
+name: Xcelium
+
+# Dictionary containg all properties/attributes required by the tool
+properties:
+  top_module:
+    description: "Name of the top level module/testbench to be run."
+    default: null
+    schema: "str()"
+  defines:
+    description: "List of source files containing defines."
+    default: null
+    schema: "str(required=False)"
+  filelist:
+    description: "List of rtl and simulation source files."
+    default: null
+    schema: "str(required=False)"
+  sdf:
+    description: "Standard Delay Format (SDF) file for delay annotations."
+    default: null
+    schema: "str(required=False)"
+  options:
+    description: "Command line options passed to xcelium. Strings are passed raw to binary."
+    default: ['-64bit']
+    schema: "list(str(), required=False)"
