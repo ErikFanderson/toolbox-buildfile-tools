@@ -5,15 +5,14 @@ from dodo_tasks import *
 # Global doit setup
 #----------------------------------------------------------
 # Doit config
-DOIT_CONFIG = {
-    'default_tasks': []
-}
+DOIT_CONFIG = {'default_tasks': []}
 
 # Global setup
-BUILD_DIR = '/sratch/efa/pipes_superswitch'
-SYMLINK = 'build'
+TOOLS_FILE = '{{args.tools_file}}'
+BUILD_DIR = '{{args.build_dir}}'
+SYMLINK = {% if args.symlink %}'{{args.symlink}}'{% else %}None{% endif %}
 CONF_YML = [
-{% for config in configs -%}
+{% for config in args.config -%}
 {% if not loop.last -%}
     "{{config}}",
 {% else -%}
@@ -21,19 +20,6 @@ CONF_YML = [
 {% endif -%}
 {% endfor -%}
 ]
-
-def return_task(file_dep:list=[],targets:list=[],actions:list=[],verbosity:int=2) -> dict:
-    """Helper function for return doit task"""
-    return {
-        'file_dep': file_dep,
-        'targets': targets,
-        'actions': actions,
-        'verbosity': verbosity
-    }
-
-def action_fn(action):
-    """Default action command w/ no line buffering"""
-    return CmdAction(action,buffering=1)
 #----------------------------------------------------------
 
 #----------------------------------------------------------
@@ -41,7 +27,12 @@ def action_fn(action):
 #----------------------------------------------------------
 def task_buildfile():
     '''Creates new buildfile'''
-    return return_task(actions=[{{build_action}}])
+    config = ' -c ' + ' -c '.join(CONF_YML)
+    build_dir = '' if not BUILD_DIR else f' -b {BUILD_DIR}'
+    symlink = '' if not SYMLINK else f' -ln {SYMLINK}'
+    tools_file = '' if not TOOLS_FILE else f' -t {TOOLS_FILE}'
+    cmd = f"toolbox-cli{config}{build_dir}{symlink}{tools_file} {{args.job}}"
+    return return_task(actions=[CmdAction(cmd, buffering=1)])
 #----------------------------------------------------------
 
 #----------------------------------------------------------
@@ -49,8 +40,6 @@ def task_buildfile():
 #----------------------------------------------------------
 def task_cleanup():
     """Cleans up files"""
-    actions = [
-	action_fn("rm -rf build *.log __pycache__ {{build_dir}}")
-    ]
+    actions = [action_fn(f"rm -rf build *.log __pycache__ {BUILD_DIR}")]
     return return_task(actions=actions)
 #----------------------------------------------------------

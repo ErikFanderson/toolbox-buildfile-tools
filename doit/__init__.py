@@ -65,13 +65,7 @@ class Doit(Tool):
         if not (Path(self.get_db('internal.work_dir')) / 'dodo.py').is_file():
             template = os.path.join(self.path, 'templates/dodo.py')
             output = os.path.join(self.get_db('internal.work_dir'), 'dodo.py')
-            build_dir = self.get_db('internal.args.symlink')
-            if not build_dir:
-                build_dir = self.get_db('internal.args.build_dir')
-            else:
-                build_dir = build_dir + ' ' + self.get_db('internal.args.build_dir')
-            build_action = f'CmdAction("toolbox-cli {self.get_db("internal.command")}", buffering=1)'
-            self.jinja_render(template, output, build_dir=build_dir, build_action=build_action, configs=self.get_db('internal.args.config'))
+            self.jinja_render(template, output, args=self.get_db('internal.args'))
             self.log('File "dodo.py" succesfully generated.')
         else:
             self.log(f'File "dodo.py" already exists in working directory.')
