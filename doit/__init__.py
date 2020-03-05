@@ -14,7 +14,6 @@ from pathlib import Path
 from toolbox.tool import Tool
 from toolbox.database import Database
 from toolbox.logger import LogLevel
-from toolbox.path_helper import PathHelper
 
 # Imports - local source
 
