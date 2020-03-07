@@ -17,11 +17,11 @@ from toolbox.logger import LogLevel
 
 # Imports - local source
 
+
 class Doit(Tool):
     """Doit buildfile tool"""
-
     def __init__(self, db: Database, log: Callable[[str, LogLevel], None]):
-        super().__init__(db,log)
+        super().__init__(db, log)
 
     def steps(self) -> List[Callable[[], None]]:
         """Returns a list of functions to run for each step"""
@@ -31,7 +31,7 @@ class Doit(Tool):
         """Uses command line command and replaces build job with job"""
         replace = True
         cmd = self.get_db("internal.command").split(' ')
-        for i,c in enumerate(cmd):
+        for i, c in enumerate(cmd):
             if replace and not c.startswith('-'):
                 cmd[i] = job
             elif c.startswith('-'):
@@ -55,7 +55,8 @@ class Doit(Tool):
             job_dict['verbosity'] = self.get_db('tools.Doit.verbosity')
             job_list.append(job_dict)
         template = os.path.join(self.path, 'templates/dodo_tasks.py')
-        output = os.path.join(self.get_db('internal.work_dir'), 'dodo_tasks.py')
+        output = os.path.join(self.get_db('internal.work_dir'),
+                              'dodo_tasks.py')
         self.jinja_render(template, output, jobs=job_list)
         self.log('File "dodo_tasks.py" succesfully generated.')
 
@@ -64,7 +65,9 @@ class Doit(Tool):
         if not (Path(self.get_db('internal.work_dir')) / 'dodo.py').is_file():
             template = os.path.join(self.path, 'templates/dodo.py')
             output = os.path.join(self.get_db('internal.work_dir'), 'dodo.py')
-            self.jinja_render(template, output, args=self.get_db('internal.args'))
+            self.jinja_render(template,
+                              output,
+                              args=self.get_db('internal.args'))
             self.log('File "dodo.py" succesfully generated.')
         else:
             self.log(f'File "dodo.py" already exists in working directory.')
