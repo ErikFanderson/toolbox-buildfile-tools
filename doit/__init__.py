@@ -9,19 +9,27 @@
 from typing import Callable, List
 import os, sys
 from pathlib import Path
+from jinja2 import StrictUndefined, Environment, FileSystemLoader
 
 # Imports - 3rd party packages
 from toolbox.tool import Tool
 from toolbox.database import Database
 from toolbox.logger import LogLevel
+from toolbox.utils import JinjaModule
 
 # Imports - local source
 
 
-class Doit(Tool):
+class Doit(Tool, JinjaModule):
     """Doit buildfile tool"""
     def __init__(self, db: Database, log: Callable[[str, LogLevel], None]):
-        super().__init__(db, log)
+        Tool.__init__(self, db, log)
+        # Create Jinja environment
+        template_dir = os.path.join(self.get_db('internal.tools.Doit.path'),
+                                    'templates')
+        fsl = FileSystemLoader(template_dir)
+        environment = Environment(loader=fsl, undefined=StrictUndefined)
+        JinjaModule.__init__(self, environment)
 
     def steps(self) -> List[Callable[[], None]]:
         """Returns a list of functions to run for each step"""
@@ -54,20 +62,18 @@ class Doit(Tool):
             job_dict['action'] = self.get_action_str(job)
             job_dict['verbosity'] = self.get_db('tools.Doit.verbosity')
             job_list.append(job_dict)
-        template = os.path.join(self.path, 'templates/dodo_tasks.py')
         output = os.path.join(self.get_db('internal.work_dir'),
                               'dodo_tasks.py')
-        self.jinja_render(template, output, jobs=job_list)
+        self.render_to_file("dodo_tasks.py", output, jobs=job_list)
         self.log('File "dodo_tasks.py" succesfully generated.')
 
     def gen_dodo(self):
         """Looks to see if dodo.py exists otherwise populates with new one"""
         if not (Path(self.get_db('internal.work_dir')) / 'dodo.py').is_file():
-            template = os.path.join(self.path, 'templates/dodo.py')
             output = os.path.join(self.get_db('internal.work_dir'), 'dodo.py')
-            self.jinja_render(template,
-                              output,
-                              args=self.get_db('internal.args'))
+            self.render_to_file("dodo.py",
+                                output,
+                                args=self.get_db('internal.args'))
             self.log('File "dodo.py" succesfully generated.')
         else:
             self.log(f'File "dodo.py" already exists in working directory.')
