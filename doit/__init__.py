@@ -15,21 +15,18 @@ from jinja2 import StrictUndefined, Environment, FileSystemLoader
 from toolbox.tool import Tool
 from toolbox.database import Database
 from toolbox.logger import LogLevel
-from toolbox.utils import JinjaModule
 
 # Imports - local source
+from jinja_tool import JinjaTool
 
 
-class Doit(Tool, JinjaModule):
+class Doit(JinjaTool):
     """Doit buildfile tool"""
     def __init__(self, db: Database, log: Callable[[str, LogLevel], None]):
         Tool.__init__(self, db, log)
-        # Create Jinja environment
         template_dir = os.path.join(self.get_db('internal.tools.Doit.path'),
                                     'templates')
-        fsl = FileSystemLoader(template_dir)
-        environment = Environment(loader=fsl, undefined=StrictUndefined)
-        JinjaModule.__init__(self, environment)
+        JinjaTool.__init__(self, db, log, [template_dir])
 
     def steps(self) -> List[Callable[[], None]]:
         """Returns a list of functions to run for each step"""

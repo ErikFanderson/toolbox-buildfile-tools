@@ -1,0 +1,3 @@
+tools:
+  - doit 
+  - toolbox/toolbox/tools/jinja_tool 
