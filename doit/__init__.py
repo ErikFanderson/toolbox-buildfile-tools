@@ -23,8 +23,7 @@ from jinja_tool import JinjaTool
 class Doit(JinjaTool):
     """Doit buildfile tool"""
     def __init__(self, db: Database, log: Callable[[str, LogLevel], None]):
-        Tool.__init__(self, db, log)
-        template_dir = os.path.join(self.get_db('internal.tools.Doit.path'),
+        template_dir = os.path.join(db.get_db('internal.tools.Doit.path'),
                                     'templates')
         JinjaTool.__init__(self, db, log, [template_dir])
 
