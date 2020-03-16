@@ -13,19 +13,3 @@ def task_{{job['name']}}() -> dict:
     }
 #----------------------------------------------------------
 {% endfor %}
-#----------------------------------------------------------
-# Utility Methods
-#----------------------------------------------------------
-def return_task(file_dep:list=[],targets:list=[],actions:list=[],verbosity:int=2) -> dict:
-    """Helper function for return doit task"""
-    return {
-        'file_dep': file_dep,
-        'targets': targets,
-        'actions': actions,
-        'verbosity': verbosity
-    }
-
-def action_fn(action):
-    """Default action command w/ no line buffering"""
-    return CmdAction(action,buffering=1)
-#----------------------------------------------------------
