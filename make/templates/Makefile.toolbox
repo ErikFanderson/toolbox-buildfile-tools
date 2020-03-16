@@ -15,7 +15,7 @@
 #----------------------------------------------------------
 list:
 	@echo "#--------------------------------------------------------------------"
-	@echo "# Toolbox generated make targets #"
+	@echo "# Toolbox generated make targets"
 	@echo "#--------------------------------------------------------------------"
 	{% for job in jobs %}
 	@echo "{{job.name}}: {{job.description}}"

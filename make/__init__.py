@@ -20,12 +20,14 @@ from toolbox.logger import LogLevel
 # Imports - local source
 from jinja_tool import JinjaTool
 
+
 @dataclass
 class MakeJob:
     name: str
     description: str
     dependencies: List[str]
     actions: List[str]
+
 
 class Make(JinjaTool):
     """Make buildfile tool"""
@@ -52,7 +54,7 @@ class Make(JinjaTool):
             else:
                 replace = True
         cmd = ' '.join(cmd)
-        return f'"toolbox-cli {cmd}"'
+        return f'toolbox-cli {cmd}'
 
     def make_jobs(self) -> List[MakeJob]:
         """Returns list of jobs"""
@@ -60,13 +62,10 @@ class Make(JinjaTool):
         job_list = []
         for j in jobs:
             job_list.append(
-                MakeJob(
-                    name=j,
-                    description=f'Need better description for task "{j}"',
-                    dependencies=[],
-                    actions=[self.get_action_str(j)]
-                )
-            )
+                MakeJob(name=j,
+                        description=f'Need better description for task "{j}"',
+                        dependencies=[],
+                        actions=[self.get_action_str(j)]))
         return job_list
 
     def render_tasks(self):
@@ -84,7 +83,7 @@ class Make(JinjaTool):
             output = os.path.join(self.get_db('internal.work_dir'), 'Makefile')
             self.render_to_file("Makefile",
                                 output,
-                                jobs=self.jobs, 
+                                jobs=self.jobs,
                                 args=self.get_db('internal.args'))
             self.log('File "Makefile" succesfully generated.')
         else:
