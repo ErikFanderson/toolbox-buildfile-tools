@@ -62,7 +62,6 @@ class Doit(JinjaTool):
         output = os.path.join(self.get_db('internal.work_dir'),
                               'dodo_tasks.py')
         self.render_to_file("dodo_tasks.py", output, jobs=job_list)
-        self.log('File "dodo_tasks.py" succesfully generated.')
 
     def gen_dodo(self):
         """Looks to see if dodo.py exists otherwise populates with new one"""
@@ -71,6 +70,5 @@ class Doit(JinjaTool):
             self.render_to_file("dodo.py",
                                 output,
                                 args=self.get_db('internal.args'))
-            self.log('File "dodo.py" succesfully generated.')
         else:
             self.log(f'File "dodo.py" already exists in working directory.')

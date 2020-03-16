@@ -75,7 +75,6 @@ class Make(JinjaTool):
         output = os.path.join(self.get_db('internal.work_dir'),
                               'Makefile.toolbox')
         self.render_to_file("Makefile.toolbox", output, jobs=self.jobs)
-        self.log('File "Makefile.toolbox" succesfully generated.')
 
     def render_makefile(self):
         """Looks to see if Makefile exists otherwise populates with new one"""
@@ -85,6 +84,5 @@ class Make(JinjaTool):
                                 output,
                                 jobs=self.jobs,
                                 args=self.get_db('internal.args'))
-            self.log('File "Makefile" succesfully generated.')
         else:
             self.log(f'File "Makefile" already exists in working directory.')
