@@ -1,9 +1,9 @@
 # Name must match the class name in __init__.py
-name: Doit
+name: Make 
 
 # Dictionary containg all properties/attributes required by the tool
 properties:
-  verbosity:
-    description: Verbosity level for doit (see doit )
-    default: 2
-    schema: "enum(0, 1, 2)"
+  placeholder:
+    description: "Currently no properties" 
+    default: "placeholder"
+    schema: "str()"

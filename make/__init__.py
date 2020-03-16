@@ -10,6 +10,7 @@ from typing import Callable, List
 import os, sys
 from pathlib import Path
 from jinja2 import StrictUndefined, Environment, FileSystemLoader
+from dataclasses import dataclass
 
 # Imports - 3rd party packages
 from toolbox.tool import Tool
@@ -19,18 +20,25 @@ from toolbox.logger import LogLevel
 # Imports - local source
 from jinja_tool import JinjaTool
 
+@dataclass
+class MakeJob:
+    name: str
+    description: str
+    dependencies: List[str]
+    actions: List[str]
 
-class Doit(JinjaTool):
-    """Doit buildfile tool"""
+class Make(JinjaTool):
+    """Make buildfile tool"""
     def __init__(self, db: Database, log: Callable[[str, LogLevel], None]):
-        template_dir = os.path.join(db.get_db('internal.tools.Doit.path'),
+        template_dir = os.path.join(db.get_db('internal.tools.Make.path'),
                                     'templates')
         JinjaTool.add_template_dirs(db, [template_dir])
-        super(Doit, self).__init__(db, log)
+        super(Make, self).__init__(db, log)
+        self.jobs = self.make_jobs()
 
     def steps(self) -> List[Callable[[], None]]:
         """Returns a list of functions to run for each step"""
-        return [self.gen_tasks, self.gen_dodo]
+        return [self.render_tasks, self.render_makefile]
 
     def get_action_str(self, job: str) -> str:
         """Uses command line command and replaces build job with job"""
@@ -44,33 +52,40 @@ class Doit(JinjaTool):
             else:
                 replace = True
         cmd = ' '.join(cmd)
-        return f'CmdAction("toolbox-cli {cmd}", buffering=1)'
+        return f'"toolbox-cli {cmd}"'
 
-    def gen_tasks(self):
-        """Generates tasks file that should be imported in the dodo file"""
+    def make_jobs(self) -> List[MakeJob]:
+        """Returns list of jobs"""
         jobs = list(self.get_db("jobs").keys())
         job_list = []
-        for job in jobs:
-            self.get_action_str(job)
-            job_dict = {}
-            job_dict['name'] = job
-            job_dict['file_dep'] = []
-            job_dict['targets'] = []
-            job_dict['action'] = self.get_action_str(job)
-            job_dict['verbosity'] = self.get_db('tools.Doit.verbosity')
-            job_list.append(job_dict)
-        output = os.path.join(self.get_db('internal.work_dir'),
-                              'dodo_tasks.py')
-        self.render_to_file("dodo_tasks.py", output, jobs=job_list)
-        self.log('File "dodo_tasks.py" succesfully generated.')
+        for j in jobs:
+            job_list.append(
+                MakeJob(
+                    name=j,
+                    description=f'Need better description for task "{j}"',
+                    dependencies=[],
+                    actions=[self.get_action_str(j)]
+                )
+            )
+        return job_list
 
-    def gen_dodo(self):
-        """Looks to see if dodo.py exists otherwise populates with new one"""
-        if not (Path(self.get_db('internal.work_dir')) / 'dodo.py').is_file():
-            output = os.path.join(self.get_db('internal.work_dir'), 'dodo.py')
-            self.render_to_file("dodo.py",
+    def render_tasks(self):
+        """Generates tasks file that should be imported in the Makefile
+        This is always regenerated
+        """
+        output = os.path.join(self.get_db('internal.work_dir'),
+                              'Makefile.toolbox')
+        self.render_to_file("Makefile.toolbox", output, jobs=self.jobs)
+        self.log('File "Makefile.toolbox" succesfully generated.')
+
+    def render_makefile(self):
+        """Looks to see if Makefile exists otherwise populates with new one"""
+        if not (Path(self.get_db('internal.work_dir')) / 'Makefile').is_file():
+            output = os.path.join(self.get_db('internal.work_dir'), 'Makefile')
+            self.render_to_file("Makefile",
                                 output,
+                                jobs=self.jobs, 
                                 args=self.get_db('internal.args'))
-            self.log('File "dodo.py" succesfully generated.')
+            self.log('File "Makefile" succesfully generated.')
         else:
-            self.log(f'File "dodo.py" already exists in working directory.')
+            self.log(f'File "Makefile" already exists in working directory.')
