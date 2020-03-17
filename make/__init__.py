@@ -25,6 +25,7 @@ from jinja_tool import JinjaTool
 class MakeJob:
     name: str
     description: str
+    spacing: str
     dependencies: List[str]
     actions: List[str]
 
@@ -58,14 +59,23 @@ class Make(JinjaTool):
 
     def make_jobs(self) -> List[MakeJob]:
         """Returns list of jobs"""
-        jobs = list(self.get_db("jobs").keys())
+        # determine maximum length of name (for spacing)
+        jobs = self.get_db("jobs")
+        max_num_chars = max([len(j) for j in jobs.keys()])
+        # create job list
         job_list = []
-        for j in jobs:
+        for k, v in jobs.items():
+            try:
+                descr = v["description"] 
+            except KeyError:
+                descr = f'No description for job "{k}"'
+            spacing = (max_num_chars - len(k)) * " "
             job_list.append(
-                MakeJob(name=j,
-                        description=f'Need better description for task "{j}"',
+                MakeJob(name=k,
+                        description=descr,
                         dependencies=[],
-                        actions=[self.get_action_str(j)]))
+                        spacing=spacing + 4 * " ",
+                        actions=[self.get_action_str(k)]))
         return job_list
 
     def render_tasks(self):

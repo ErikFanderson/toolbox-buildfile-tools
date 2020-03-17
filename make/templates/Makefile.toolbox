@@ -18,7 +18,7 @@ list:
 	@echo "# Toolbox generated make targets"
 	@echo "#--------------------------------------------------------------------"
 	{% for job in jobs %}
-	@echo "{{job.name}}: {{job.description}}"
+	@echo "{{job.name}}{{job.spacing}}{{job.description}}"
 	{% endfor %}
 	@echo "#--------------------------------------------------------------------"
 .PHONY: list 
