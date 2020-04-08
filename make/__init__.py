@@ -33,10 +33,11 @@ class MakeJob:
 class Make(JinjaTool):
     """Make buildfile tool"""
     def __init__(self, db: Database, log: Callable[[str, LogLevel], None]):
+        super(Make, self).__init__(db, log)
         template_dir = os.path.join(db.get_db('internal.tools.Make.path'),
                                     'templates')
-        JinjaTool.add_template_dirs(db, [template_dir])
-        super(Make, self).__init__(db, log)
+        templates = [str(f) for f in Path(template_dir).glob("*")]
+        self.add_jinja_templates(templates)
         self.jobs = self.make_jobs()
 
     def steps(self) -> List[Callable[[], None]]:
@@ -66,7 +67,7 @@ class Make(JinjaTool):
         job_list = []
         for k, v in jobs.items():
             try:
-                descr = v["description"] 
+                descr = v["description"]
             except KeyError:
                 descr = f'No description for job "{k}"'
             spacing = (max_num_chars - len(k)) * " "
