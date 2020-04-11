@@ -34,10 +34,6 @@ class Make(JinjaTool):
     """Make buildfile tool"""
     def __init__(self, db: Database, log: Callable[[str, LogLevel], None]):
         super(Make, self).__init__(db, log)
-        template_dir = os.path.join(db.get_db('internal.tools.Make.path'),
-                                    'templates')
-        templates = [str(f) for f in Path(template_dir).glob("*")]
-        self.add_jinja_templates(templates)
         self.jobs = self.make_jobs()
 
     def steps(self) -> List[Callable[[], None]]:
