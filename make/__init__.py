@@ -40,19 +40,21 @@ class Make(JinjaTool):
         """Returns a list of functions to run for each step"""
         return [self.render_tasks, self.render_makefile]
 
-    def get_action_str(self, job: str) -> str:
+    def get_command(self, job: str) -> str:
         """Uses command line command and replaces build job with job"""
-        replace = True
-        cmd = self.get_db("internal.command").split(' ')
-        for i, c in enumerate(cmd):
-            if replace and not c.startswith('-'):
-                cmd[i] = job
-            elif c.startswith('-'):
-                replace = False
-            else:
-                replace = True
-        cmd = ' '.join(cmd)
-        return f'toolbox-cli {cmd}'
+        args = self.get_db("internal.args")
+        rstr = "toolbox-cli"
+        rstr += f" -t {args['tools_file']}"
+        if args["config"]:
+            rstr += " -c " + " -c ".join(args["config"])
+        if args["symlink"]:
+            rstr += " -ln {args['symlnk']}"
+        if args["log_params"].color:
+            rstr += " --color"
+        rstr += f" -l {args['log_params'].level.name.lower()}"
+        rstr += f" -b {args['build_dir']}"
+        rstr += f" -o {args['out_fname']}"
+        return rstr + f" {job}"
 
     def make_jobs(self) -> List[MakeJob]:
         """Returns list of jobs"""
@@ -72,7 +74,7 @@ class Make(JinjaTool):
                         description=descr,
                         dependencies=[],
                         spacing=spacing + 4 * " ",
-                        actions=[self.get_action_str(k)]))
+                        actions=[self.get_command(k)]))
         return job_list
 
     def render_tasks(self):
