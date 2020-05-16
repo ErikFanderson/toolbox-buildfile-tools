@@ -44,7 +44,6 @@ class Make(JinjaTool):
         """Uses command line command and replaces build job with job"""
         args = self.get_db("internal.args")
         rstr = "toolbox-cli"
-        rstr += f" -t {args['tools_file']}"
         if args["config"]:
             rstr += " -c " + " -c ".join(args["config"])
         if args["symlink"]:
