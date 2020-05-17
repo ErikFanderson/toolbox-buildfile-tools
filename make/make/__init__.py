@@ -40,21 +40,6 @@ class Make(JinjaTool):
         """Returns a list of functions to run for each step"""
         return [self.render_tasks, self.render_makefile]
 
-    def get_command(self, job: str) -> str:
-        """Uses command line command and replaces build job with job"""
-        args = self.get_db("internal.args")
-        rstr = "toolbox-cli"
-        if args["config"]:
-            rstr += " -c " + " -c ".join(args["config"])
-        if args["symlink"]:
-            rstr += " -ln {args['symlnk']}"
-        if args["log_params"].color:
-            rstr += " --color"
-        rstr += f" -l {args['log_params'].level.name.lower()}"
-        rstr += f" -b {args['build_dir']}"
-        rstr += f" -o {args['out_fname']}"
-        return rstr + f" {job}"
-
     def make_jobs(self) -> List[MakeJob]:
         """Returns list of jobs"""
         # determine maximum length of name (for spacing)
