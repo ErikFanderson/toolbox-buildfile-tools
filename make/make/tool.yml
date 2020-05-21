@@ -4,7 +4,14 @@ namespace: make
 
 # Dictionary containg all properties/attributes required by the tool
 properties:
-  placeholder:
-    description: "Currently no properties" 
-    default: "placeholder"
-    schema: "str()"
+  targets:
+    description: "List of configuration generators"
+    default: []
+    schema: "list(include('target'))"
+schema_includes:
+  target:
+    name: "str()"
+    outputs: "list(str())"
+    commands: "list(str())"
+    description: "str()"
+    dependencies: "list(file())"

@@ -10,6 +10,27 @@
 #----------------------------------------------------------
 
 {% endfor %}
+{% for target in targets %}
+#----------------------------------------------------------
+# Target "{{target.name}}" 
+#----------------------------------------------------------
+{% if target.outputs %}
+{{target.name}}: {{target.outputs|join(" ")}}
+
+{{target.outputs|join(" ")}} &: {{ target.dependencies|join(" ") }}
+	{% for action in target.actions %}
+	{{action}}	
+	{% endfor %}
+{% else %}
+{{target.name}}: {{ target.dependencies|join(" ") }}
+	{% for action in target.actions %}
+	{{action}}	
+	{% endfor %}
+.PHONY: {{target.name}}
+{% endif %}
+#----------------------------------------------------------
+
+{% endfor %}
 #----------------------------------------------------------
 # Target "list" - lists all found jobs
 #----------------------------------------------------------
@@ -19,6 +40,9 @@ list:
 	@echo "#--------------------------------------------------------------------"
 	{% for job in jobs %}
 	@echo "{{job.name}}{{job.spacing}}{{job.description}}"
+	{% endfor %}
+	{% for target in targets %}
+	@echo "{{target.name}}{{target.spacing}}{{target.description}}"
 	{% endfor %}
 	@echo "#--------------------------------------------------------------------"
 .PHONY: list 
