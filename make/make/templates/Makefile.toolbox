@@ -17,7 +17,7 @@
 {% if target.outputs %}
 {{target.name}}: {{target.outputs|join(" ")}}
 
-{{target.outputs|join(" ")}} &: {{ target.dependencies|join(" ") }}
+{{target.outputs|join(" ")}} : {{ target.dependencies|join(" ") }}
 	{% for action in target.actions %}
 	{{action}}	
 	{% endfor %}
