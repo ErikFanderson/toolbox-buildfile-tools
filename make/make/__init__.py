@@ -88,7 +88,7 @@ class Make(JinjaTool):
         bsub = self.make["bsub"]
         if bsub is not None:
             for job in self.jobs:
-                if job.name != "build":
+                if job.name != self.get_db("internal.args.job"):
                     actions = [f'bsub -q {bsub["queue"]} "{action}"' for action in job.actions]
                     name = f"{job.name}-bsub"
                     job_list.append(MakeJob(name=name,
