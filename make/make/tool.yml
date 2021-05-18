@@ -8,6 +8,10 @@ properties:
     description: "List of configuration generators"
     default: []
     schema: "list(include('target'))"
+  bsub:
+    description: "Optional bsub parameters for LSF clusters"
+    default: null
+    schema: "include('bsub', required=False)"
 schema_includes:
   target:
     name: "str()"
@@ -15,3 +19,5 @@ schema_includes:
     commands: "list(str())"
     description: "str()"
     dependencies: "list(file())"
+  bsub:
+    queue: "str()"

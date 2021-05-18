@@ -48,14 +48,20 @@ class Make(JinjaTool):
         jobs = self.get_db("jobs")
         self.max_num_chars = max([len(j) for j in jobs.keys()])
         self.max_num_chars = max([len(t["name"]) for t in self.make["targets"]] + 
-            [self.max_num_chars]) 
+            [self.max_num_chars])
+        if self.make["bsub"] is not None:
+            self.max_num_chars += 5
         self.jobs = self.make_jobs()
         self.targets = self.make_targets()
+        self.bsub_jobs = self.make_bsub_jobs()
 
 
     def steps(self) -> List[Callable[[], None]]:
         """Returns a list of functions to run for each step"""
         return [self.render_tasks, self.render_makefile]
+            
+    def calc_spacing(self, name):
+        return (self.max_num_chars - len(name)) * " "
 
     def make_jobs(self) -> List[MakeJob]:
         """Returns list of jobs"""
@@ -66,7 +72,7 @@ class Make(JinjaTool):
                 descr = v["description"]
             except KeyError:
                 descr = f'No description for job "{k}"'
-            spacing = (self.max_num_chars - len(k)) * " "
+            spacing = self.calc_spacing(k) 
             job_list.append(
                 MakeJob(name=k,
                         description=descr,
@@ -74,6 +80,22 @@ class Make(JinjaTool):
                         spacing=spacing + 4 * " ",
                         actions=[self.get_command(k)]))
 
+        return job_list
+    
+    def make_bsub_jobs(self) -> List[MakeJob]:
+        """Returns list of bsub jobs"""
+        job_list = []
+        bsub = self.make["bsub"]
+        if bsub is not None:
+            for job in self.jobs:
+                if job.name != "build":
+                    actions = [f'bsub -q {bsub["queue"]} "{action}"' for action in job.actions]
+                    name = f"{job.name}-bsub"
+                    job_list.append(MakeJob(name=name,
+                            description=f"[bsub] {job.description}",
+                            dependencies=[],
+                            spacing=self.calc_spacing(name) + 4 * " ",
+                            actions=actions))
         return job_list
     
     def make_targets(self) -> List[MakeJob]:
@@ -84,7 +106,7 @@ class Make(JinjaTool):
             descr = t["description"] if t["description"] else f'Target "{t["name"]}"'
             dependencies = t["dependencies"] if t["dependencies"] else [] 
             outputs = t["outputs"] if t["outputs"] else [] 
-            spacing = (self.max_num_chars - len(t["name"])) * " "
+            spacing = self.calc_spacing(t["name"]) 
             target_list.append(
                 MakeTarget(name=t["name"],
                         description=descr,
@@ -101,7 +123,7 @@ class Make(JinjaTool):
         """
         output = os.path.join(self.get_db('internal.work_dir'),
                               'Makefile.toolbox')
-        self.render_to_file("Makefile.toolbox", output, jobs=self.jobs, targets=self.targets)
+        self.render_to_file("Makefile.toolbox", output, jobs=self.jobs, targets=self.targets, bsub_jobs=self.bsub_jobs)
 
     def render_makefile(self):
         """Looks to see if Makefile exists otherwise populates with new one"""

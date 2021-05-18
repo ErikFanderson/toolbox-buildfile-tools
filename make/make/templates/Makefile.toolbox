@@ -11,6 +11,9 @@ list:
 	{% for target in targets %}
 	@echo "{{target.name}}{{target.spacing}}{{target.description}}"
 	{% endfor %}
+	{% for job in bsub_jobs %}
+	@echo "{{job.name}}{{job.spacing}}{{job.description}}"
+	{% endfor %}
 	@echo "#--------------------------------------------------------------------"
 .PHONY: list 
 #----------------------------------------------------------
@@ -45,6 +48,18 @@ list:
 	{% endfor %}
 .PHONY: {{target.name}}
 {% endif %}
+#----------------------------------------------------------
+
+{% endfor %}
+{% for job in bsub_jobs %}
+#----------------------------------------------------------
+# BSUB Target "{{job.name}}" 
+#----------------------------------------------------------
+{{job.name}}: {{ job.dependencies|join(" ") }}
+	{% for action in job.actions %}
+	{{action}}
+	{% endfor %}
+.PHONY: {{job.name}}
 #----------------------------------------------------------
 
 {% endfor %}
